@@ -30,19 +30,19 @@ def walk(paths):
             tqdm.write(gpx_path)
 
 
-def merge_segments(track, thres=200):
+def concat_segments(track, thres=200):
     # Remove empty segments
     track.segments = [s for s in track.segments if len(s.points) > 0]
     if len(track.segments) == 1:
         return track
 
-    # Merge segments
+    # Concat segments
     base_seg = track.segments[0]
     for seg in track.segments[1:]:
         dist = base_seg.points[-1].distance_2d(seg.points[0])
         if dist > thres:
             raise ValueError(
-                f'Segment different too large: {dist}, merge aborted.')
+                f'Segment different too large: {dist}, concat aborted.')
         base_seg.join(seg)
     track.segments = [base_seg]
     return track
@@ -52,13 +52,13 @@ def merge_segments(track, thres=200):
 @click.argument('path')
 @click.option(
     '--thres', type=int, default=200, help='Threshold for merging, in meters')
-def merge(path, thres):
+def concat(path, thres):
     path = Path(path)
     with path.open() as f:
         gpx = gpxpy.parse(f)
 
     track = gpx.tracks[0]
-    merge_segments(track, thres)
+    concat_segments(track, thres)
 
     with path.open('w') as f:
         f.write(gpx.to_xml())
