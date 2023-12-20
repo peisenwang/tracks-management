@@ -16,11 +16,15 @@ if __name__ == '__main__':
     parser.add_argument(
         '--nameless', action='store_true',
         help='Don\'t name tracks for better visualization in google earth')
+    parser.add_argument(
+        '--extensions', action='store_true',
+        help='Keep trackpoint extensions (speed etc.) from tracks')
     args = parser.parse_args()
 
     # assert len(args.tracks) > 1, 'Need more than one gpx files to merge '
 
     tracks = []
+    nsmap = {}
     for path in tqdm(args.tracks):
         with open(path) as f:
             gpx = gpxpy.parse(f)
@@ -28,11 +32,12 @@ if __name__ == '__main__':
         assert len(gpx.tracks) == 1
         track = gpx.tracks[0]
 
-        # Avoid wired bug when "osmand:" get replaced by
-        # "{https://osmand.net}", causing output track un-loadable.
-        for s in track.segments:
-            for p in s.points:
-                p.extensions = []
+        if args.extensions:
+            nsmap |= gpx.nsmap
+        else:
+            for s in track.segments:
+                for p in s.points:
+                    p.extensions = []
 
         if args.dist > 0:
             track.simplify(args.dist)
@@ -45,6 +50,7 @@ if __name__ == '__main__':
         tracks.append(track)
 
     gpx = gpxpy.gpx.GPX()
+    gpx.nsmap = nsmap
     gpx.tracks = tracks
 
     with open(args.out, 'w') as f:
