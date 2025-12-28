@@ -11,7 +11,8 @@ if __name__ == '__main__':
         description='Merge multi gpx files into one with simplification')
     parser.add_argument('tracks', nargs='+', help='Paths to gpx file to merge')
     parser.add_argument(
-        '-d', '--dist', default=10, help='Distance for simplying tracks')
+        '-d', '--dist', default=10, type=float,
+        help='Distance for simplying tracks')
     parser.add_argument('-o', '--out', required=True, help='Output gpx path')
     parser.add_argument(
         '--nameless', action='store_true',
