@@ -20,6 +20,9 @@ if __name__ == '__main__':
     parser.add_argument(
         '--extensions', action='store_true',
         help='Keep trackpoint extensions (speed etc.) from tracks')
+    parser.add_argument(
+        '--single-track', action='store_true',
+        help='Merge inputs into a single track as segments')
     args = parser.parse_args()
 
     # assert len(args.tracks) > 1, 'Need more than one gpx files to merge '
@@ -49,6 +52,11 @@ if __name__ == '__main__':
             name, _ = os.path.splitext(os.path.basename(path))
         track.name = name
         tracks.append(track)
+
+    if args.single_track:
+        for t in tracks[1:]:
+            tracks[0].segments.extend(t.segments)
+        tracks = tracks[:1]
 
     gpx = gpxpy.gpx.GPX()
     gpx.nsmap = nsmap
